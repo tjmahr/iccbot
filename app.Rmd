@@ -1,0 +1,66 @@
+---
+title: ICC Bot
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: yeti
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(irr)
+
+data(anxiety, package = "irr")
+d <- anxiety
+getData <- function() {
+  d
+}
+```
+
+
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+Upload a csv file of scores with one column per rater and no other columns.
+
+```{r, echo = FALSE}
+fileInput(
+  "file1", 
+  "Choose CSV File", 
+  accept = c(
+    "text/csv",
+    "text/comma-separated-values,text/plain",
+    ".csv")
+)
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### ICC
+
+```{r}
+icc(getData())
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Data preview
+
+
+```{r}
+head(getData())
+```
+
+### Chart C
+
+```{r}
+"hello"
+```
+
