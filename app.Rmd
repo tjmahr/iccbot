@@ -9,14 +9,38 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
 library(flexdashboard)
 library(shiny)
 library(irr)
 
 data(anxiety, package = "irr")
 d <- anxiety
+
 getData <- function() {
   d
+}
+
+add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
+  icc$lbound_p <- icc$lbound %>% 
+    printy::fmt_fix_digits(icc_digits) %>% 
+    printy::fmt_leading_zero()
+  
+  icc$ubound_p <- icc$ubound %>% 
+    printy::fmt_fix_digits(icc_digits) %>% 
+    printy::fmt_leading_zero()
+  
+  icc$value <- icc$value %>% 
+    printy::fmt_fix_digits(icc_digits) %>% 
+    printy::fmt_leading_zero()
+  
+  icc$model_p <- ifelse(
+    icc$model == "twoway", 
+    "two-way", 
+    "one-way"
+  )
+  
+  icc
 }
 ```
 
@@ -45,8 +69,20 @@ Column {data-width=650}
 ### ICC
 
 ```{r}
-icc(getData())
+icc_results <- add_formatted_results_to_icc(icc(getData()))
+icc_results
 ```
+
+Summary
+
+We calculated interrater reliability on the `total scores` for 
+[instrument_name] with the intraclass correlation coefficient (ICC)
+estimated using the irr R package [vers. `r packageVersion("irr")`;
+@R-irr]. We used a `single-score`, `absolute-agreement`, `r icc_results$model_p`
+random effects model, and we found `strong` agreement between the `two`
+raters, ICC = `r icc_results$value`, 95% CI = [`r icc_results$lbound_p`,
+`r icc_results$ubound_p`].
+
 
 Column {data-width=350}
 -----------------------------------------------------------------------
