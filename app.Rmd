@@ -5,7 +5,10 @@ output:
     orientation: columns
     vertical_layout: fill
     theme: yeti
+    source_code: https://github.com/tjmahr/iccbot
 runtime: shiny
+bibliography: refs.bib
+csl: apa.csl
 ---
 
 ```{r setup, include=FALSE}
@@ -14,11 +17,30 @@ library(flexdashboard)
 library(shiny)
 library(irr)
 
+# Default dataset
 data(anxiety, package = "irr")
 d <- anxiety
 
 getData <- function() {
-  d
+  if (is.null(input$file1)) {
+    anxiety
+  } else {
+    read.csv(input$file1$datapath)
+  }
+}
+
+runICC <- function() {
+  req(input$nway)
+  
+  model <- ifelse(input$nway == "yes", "twoway", "oneway")
+  
+  add_formatted_results_to_icc(
+    icc(
+      getData(),
+      model = model
+      
+    )
+  )
 }
 
 add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
@@ -40,8 +62,22 @@ add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
     "one-way"
   )
   
+  icc$unit_p <- ifelse(
+    icc$unit == "single", 
+    "single-score", 
+    "mean-score"
+  )
+  
+  icc$type_p <- ifelse(
+    icc$type == "consistency", 
+    "consistency-based agreement", 
+    "absolute agreement"
+  )
+  
   icc
 }
+
+
 ```
 
 
@@ -60,43 +96,60 @@ fileInput(
     "text/comma-separated-values,text/plain",
     ".csv")
 )
+
+selectInput(
+  "nway",
+  label = "Are the raters members of a larger pool of possible raters?", 
+  choices = c("yes", "no"), 
+  multiple = FALSE 
+)
+
+
+selectInput(
+  "agreement",
+  label = "Do you want to estimate agreement of raters or consistency of raters? ", 
+  choices = c("absolute-agreement", "consistency"),
+  multiple = FALSE 
+)
 ```
 
+<small>If rater A gives three students grades of D, C-, C and rater B gives the same students C-, B-, B+, they would be consistent but they would not agreement. </small>
 
-Column {data-width=650}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
-### ICC
 
-```{r}
-icc_results <- add_formatted_results_to_icc(icc(getData()))
-icc_results
-```
+### ICC Bot says
 
-Summary
+We calculated the interrater reliability of [*instrument name*] with the
+intraclass correlation coefficient (ICC) estimated using the irr R package
+[vers. `r packageVersion("irr")`; @R-irr]. Each of the
+`r renderText(runICC()[["subjects"]])` participants were scored by
+`r renderText(runICC()[["raters"]])` raters.
 
-We calculated interrater reliability on the `total scores` for 
-[instrument_name] with the intraclass correlation coefficient (ICC)
-estimated using the irr R package [vers. `r packageVersion("irr")`;
-@R-irr]. We used a `single-score`, `absolute-agreement`, `r icc_results$model_p`
-random effects model, and we found `strong` agreement between the `two`
-raters, ICC = `r icc_results$value`, 95% CI = [`r icc_results$lbound_p`,
-`r icc_results$ubound_p`].
+We used a `r renderText(runICC()[["unit_p"]])`, `r renderText(runICC()[["type_p"]])`,
+`r renderText(runICC()[["model_p"]])` random effects model, and we found
+`_________` agreement among raters, ICC =
+`r renderText(runICC()[["value"]])`, 95% CI =
+[`r renderText(runICC()[["lbound_p"]])`,
+`r renderText(runICC()[["ubound_p"]])`].
 
+***
 
-Column {data-width=350}
+<div id="refs"></div>
+
+Column {data-width=450}
 -----------------------------------------------------------------------
 
-### Data preview
 
-
-```{r}
-head(getData())
-```
-
-### Chart C
+### ICC print out
 
 ```{r}
-"hello"
+renderPrint(runICC())
 ```
 
+### First six rows of data
+
+```{r}
+renderPrint(head(getData()))
+```
