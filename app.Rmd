@@ -3,19 +3,21 @@ title: ICC Bot
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill
+    vertical_layout: scroll
     theme: yeti
     source_code: https://github.com/tjmahr/iccbot
+    md_extensions: "-tex_math_single_backslash"
 runtime: shiny
 bibliography: refs.bib
 csl: apa.csl
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(flexdashboard)
 library(shiny)
 library(irr)
+
 
 # Default dataset
 data(anxiety, package = "irr")
@@ -29,19 +31,34 @@ getData <- function() {
   }
 }
 
+usesTwoWayModel <- function() {
+  req(input$use_twoway_model)
+  input$use_twoway_model == "yes"
+}
+
 runICC <- function() {
-  req(input$nway)
+  req(input$use_twoway_model)
+  req(input$single_or_average)
+  req(input$agreement_or_consistency)
   
-  model <- ifelse(input$nway == "yes", "twoway", "oneway")
+  model <- ifelse(input$use_twoway_model == "yes", "twoway", "oneway")
+  unit  <- ifelse(input$single_or_average == "single", "single", "average")
+  type <- ifelse(
+    input$agreement_or_consistency == "absolute agreement", 
+    "agreement", 
+    "consistency"
+  )
   
   add_formatted_results_to_icc(
     icc(
       getData(),
-      model = model
+      model = model,
+      unit = unit
       
     )
   )
 }
+
 
 add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
   icc$lbound_p <- icc$lbound %>% 
@@ -81,9 +98,8 @@ add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
 ```
 
 
-
-Inputs {.sidebar}
------------------------------------------------------------------------
+Column {.sidebar}
+======================================================================
 
 Upload a csv file of scores with one column per rater and no other columns.
 
@@ -98,7 +114,7 @@ fileInput(
 )
 
 selectInput(
-  "nway",
+  "use_twoway_model",
   label = "Are the raters members of a larger pool of possible raters?", 
   choices = c("yes", "no"), 
   multiple = FALSE 
@@ -106,14 +122,48 @@ selectInput(
 
 
 selectInput(
-  "agreement",
-  label = "Do you want to estimate agreement of raters or consistency of raters? ", 
-  choices = c("absolute-agreement", "consistency"),
+  "single_or_average",
+  label = "Do you want the reliability for a single rating or the reliability for the average rating?", 
+  choices = c("single", "average"),
   multiple = FALSE 
 )
+
+
+
+renderUI({
+  req(input$use_twoway_model)
+  
+  choices <- if (input$use_twoway_model == "no") {
+    c("consistency")
+  } else {
+    c("absolute agreement", "consistency")
+  }
+  
+  label <- if (input$use_twoway_model == "no") {
+    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> Agreement is not available for oneway models.")
+    
+  } else {
+    "Do you want to estimate agreement of raters or consistency of raters?"
+  }
+  
+  selectInput(
+    "agreement_or_consistency",
+    label = label, 
+    choices = choices,
+    multiple = FALSE
+  )
+})
+
+
 ```
 
-<small>If rater A gives three students grades of D, C-, C and rater B gives the same students C-, B-, B+, they would be consistent but they would not agreement. </small>
+***
+
+<small>Developed by TJ Mahr for <a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.</small>
+
+Run ICC Bot
+======================================================================
+
 
 Column {data-width=400}
 -----------------------------------------------------------------------
@@ -138,11 +188,12 @@ We used a `r renderText(runICC()[["unit_p"]])`, `r renderText(runICC()[["type_p"
 
 <div id="refs"></div>
 
+
 Column {data-width=450}
 -----------------------------------------------------------------------
 
 
-### ICC print out
+### ICC printout
 
 ```{r}
 renderPrint(runICC())
@@ -152,4 +203,14 @@ renderPrint(runICC())
 
 ```{r}
 renderPrint(head(getData()))
+```
+
+
+
+What is the ICC?
+======================================================================
+
+
+
+```{r, child="test.md"}
 ```

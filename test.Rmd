@@ -1,0 +1,77 @@
+---
+output: 
+  github_document:
+    # variant: "markdown" 
+    md_extensions: "+citations+header_attributes"
+bibliography: ./refs.bib
+csl: ./apa.csl
+---
+
+
+## `r "Column {data-width=600}"`
+
+### `r "Measurement {.no-title}"`
+
+#### Similarity of repeated measurements
+
+The ICC is the *intraclass correlation coefficient*. It provides a way to
+measure the correlation of data within measurement units (classes). For example,
+suppose we give the same assessment to the same 10 children on three occasions. We
+would want the scores to be correlated within each child, so that a child
+attains a similar score on each occasion. The ICC estimates this correlation. 
+
+Now, let's change the example from children tested three times to children who
+visit a research lab once but have their data scored by three different raters
+(or judges or coders). Then the ICC would measure how similar the scores are
+within children. If scores are very similar within children, then the
+differences between judges are small and the judges have high agreement with
+each other. This is how ICC works as a measure of interrater reliability.
+
+#### Six flavors of ICC
+
+Unfortunately, there are six different definitions of the ICC, depending on the
+options on the left side.
+
+This app covers x of these. They are ...
+
+
+#### Some guidance on interpretation
+
+Snijders and Bosker (1999), thinking about individuals nested in groups:
+
+<small>
+[The ICC] can be interpreted in two ways: it is the correlation between two
+randomly drawn individuals in one randomly drawn group [i.e, two randomly drawn
+measures from the same, randomly selected measurement unit], and it also the
+fraction of total variability that is due to the group level. [p. 48]
+</small>
+
+Some definitions talk about the variance *within* groups versus the variance
+*between* groups. When Snijders and Bosker say "fraction of total varability",
+they have that a fraction like `between-group variance / total variance` in
+mind.
+
+Kreft and De Leeuw [-@kreft1998introducing], thinking about individuals nested
+in groups, do a good job explaining what it means for between-group variance to
+be low compared to within-group variance.
+
+<small>
+If this intra-class correlation is high, groups are homogeneous and/or very
+different from each other. [...] In general, it is true that if this
+intra-class correlation is low, groups are only slightly different from each
+other. If the intra-class correlation is so low that is equal to zero, no group
+differences exist for the variables of interest. People from the same group are
+as different from each other on these variables as people across groups are. A
+zero intra-class correlation means that clustering of the data has no
+consequences for the relationship between the variables of interest [...].
+[p. 4]
+</small>
+
+
+#### References
+
+<div id="refs"></div>
+
+
+`r "Column {data-width=300}"`
+-----------------------------------------------------------------------
