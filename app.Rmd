@@ -41,8 +41,16 @@ runICC <- function() {
   req(input$single_or_average)
   req(input$agreement_or_consistency)
   
-  model <- ifelse(input$use_twoway_model == "yes", "twoway", "oneway")
-  unit  <- ifelse(input$single_or_average == "single", "single", "average")
+  model <- ifelse(
+    input$use_twoway_model == "yes (two-way model)", 
+    "twoway", 
+    "oneway"
+  )
+  unit  <- ifelse(
+    input$single_or_average == "single rating", 
+    "single", 
+    "average"
+  )
   type <- ifelse(
     input$agreement_or_consistency == "absolute agreement", 
     "agreement", 
@@ -53,11 +61,13 @@ runICC <- function() {
     icc(
       getData(),
       model = model,
-      unit = unit
-      
+      unit = unit,
+      type = type
     )
   )
 }
+
+
 
 
 add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
@@ -81,21 +91,32 @@ add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
   
   icc$unit_p <- ifelse(
     icc$unit == "single", 
-    "single-score", 
-    "mean-score"
+    "a single-score", 
+    "an average-score"
   )
   
   icc$type_p <- ifelse(
     icc$type == "consistency", 
-    "consistency-based agreement", 
+    "consistency-based", 
     "absolute agreement"
   )
   
   icc
 }
 
-
+i <- reactive(list(
+  subjects = runICC()[["subjects"]],
+  n_trials = runICC()[["raters"]],
+  unit_p = runICC()[["unit_p"]],
+  type_p = runICC()[["type_p"]],
+  model_p = runICC()[["model_p"]],
+  icc.name = runICC()[["icc.name"]],
+  value = runICC()[["value"]],
+  lbound_p = runICC()[["lbound_p"]],
+  ubound_p = runICC()[["ubound_p"]]
+))
 ```
+
 
 
 Column {.sidebar}
@@ -115,8 +136,8 @@ fileInput(
 
 selectInput(
   "use_twoway_model",
-  label = "Are the raters members of a larger pool of possible raters?", 
-  choices = c("yes", "no"), 
+  label = "Do raters evaluate more than one participant?", 
+  choices = c("yes (two-way model)", "no (one-way model)"), 
   multiple = FALSE 
 )
 
@@ -124,7 +145,7 @@ selectInput(
 selectInput(
   "single_or_average",
   label = "Do you want the reliability for a single rating or the reliability for the average rating?", 
-  choices = c("single", "average"),
+  choices = c("single rating", "average rating"),
   multiple = FALSE 
 )
 
@@ -159,7 +180,10 @@ renderUI({
 
 ***
 
-<small>Developed by TJ Mahr for <a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.</small>
+<small>
+Developed by TJ Mahr for
+<a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.
+</small>
 
 Run ICC Bot
 ======================================================================
@@ -171,18 +195,18 @@ Column {data-width=400}
 
 ### ICC Bot says
 
-We calculated the interrater reliability of [*instrument name*] with the
+We calculated the interrater reliability of [`instrument name`] with the
 intraclass correlation coefficient (ICC) estimated using the irr R package
 [vers. `r packageVersion("irr")`; @R-irr]. Each of the
-`r renderText(runICC()[["subjects"]])` participants were scored by
-`r renderText(runICC()[["raters"]])` raters.
+`r renderText(i()[["subjects"]])` participants were scored by
+`r renderText(i()[["raters"]])` raters.
 
-We used a `r renderText(runICC()[["unit_p"]])`, `r renderText(runICC()[["type_p"]])`,
-`r renderText(runICC()[["model_p"]])` random effects model, and we found
-`_________` agreement among raters, ICC =
-`r renderText(runICC()[["value"]])`, 95% CI =
-[`r renderText(runICC()[["lbound_p"]])`,
-`r renderText(runICC()[["ubound_p"]])`].
+We used `r renderText(i()[["unit_p"]])`, `r renderText(i()[["type_p"]])`,
+`r renderText(i()[["model_p"]])` random effects model, and we found
+[`interpert the correlation`] agreement among raters, `r renderText(i()[["icc.name"]])` =
+`r renderText(i()[["value"]])`, 95% CI =
+[`r renderText(i()[["lbound_p"]])`,
+`r renderText(i()[["ubound_p"]])`].
 
 ***
 
@@ -207,10 +231,10 @@ renderPrint(head(getData()))
 
 
 
-What is the ICC?
+Bot Settings and ICC Interpretation 
 ======================================================================
 
 
 
-```{r, child="test.md"}
+```{r, child="icc-notes.md"}
 ```

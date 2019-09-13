@@ -1,0 +1,215 @@
+---
+output: 
+  github_document:
+    md_extensions: "+citations+header_attributes"
+bibliography: ./refs.bib
+csl: ./apa.csl
+---
+
+
+## `r "Column {data-width=600}"`
+
+### `r "Measurement {.no-title}"`
+
+#### **What settings should I choose?**
+
+##### **Repeated raters (two-way) vs. unique raters (one-way)**
+
+* If raters only ever evaluate one participant each, use `no (one-way model)`.
+* Otherwise, `yes (two-way model)`.
+
+In the one-way model, the data are repeated or grouped in just one way (participants who have multiple ratings). @hallgren2012 elaborates:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+If a different set of coders is randomly selected from a larger population of
+coders for each subject then the researcher must use a one-way model. This is
+called “one-way” because the new random sample of coders for each subject
+prevents the ICC from accounting for systematic deviations due to specific
+coders [...] or two-way coder × subject interactions [...].
+</small>
+</div>
+ 
+In the two-way case, where some raters evaluated multiple participants, there
+is another decision one can make: Whether the
+estimated reliability should generalize to new raters (*two-way random*) or
+raters should be treated as fixed (*two-way mixed*). This app does not support
+the latter option, but it is supported by the `psych::ICC()` function. 
+
+In general, if a new person---a new student, clinician, etc.---could be trained
+to perform the rating task, the two-way random is a reasonable default. See how
+Koo and Li [-@koo2016] emphasize generalizability for two-way random
+models:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+If we randomly select our raters from a larger population of raters with similar
+characteristics, 2-way random-effects model is the model of choice. In other
+words, we choose 2-way random-effects model if we plan to generalize our
+reliability results to any raters who possess the same characteristics as
+the selected raters in the reliability study.
+</small>
+</div>
+
+
+
+
+##### **Single rating vs. Average rating**
+
+  - If your eventual analysis will use just one rating per participant, use
+    `single rating`.
+  - If everyone was rated by more than one rater and you plan to add, combine or
+    average the ratings together in your eventual analysis, use `average
+    rating`.
+
+Yoder and Symons [-@2010observational] spell out the difference:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+The "single measure" ICC is the interobserver reliability estimate for a single
+observer for the relevant variable. [...] [The] "average measure" ICC is
+that for the average of the observers' estimates for the variable. It is only
+appropriate to use the latter when the investigator has all sessions coded by
+more than one observer and uses the average score across observers as the
+variable score to answer the research question. [p. 177]
+</small>
+</div>
+
+Note that changing from single-rating to average-rating reliability means that
+we cannot talk about single scores being reliable---we only know about the
+reliability of the averages. Shrout and Fleiss [-@icc1979], in their landmark
+survey of ICC types, illustrates this point:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+Sometimes the choice of a unit of analysis causes a conflict between reliability
+considerations and substantive interpretations. A mean of *k* ratings might be
+needed for reliability, but the generalization of interest might be individuals.
+
+For example, Bayes (1972) desired to relate ratings of interpersonal warmth to
+nonverbal communication variables. She reported the reliability of the warmth
+ratings based on the judgments of 30 observers on 15 targets. Because the rating
+variable that she related to the other variables was the mean rating over all 30
+observers, she correctly reported the reliability of the mean ratings. With this
+index, she found that her mean ratings were reliable to .90. When she
+interpreted her findings, however, she generalized to single observers, not to
+other groups of 30 observers. This generalization may be problematic, since the
+reliability of the individual ratings was less than .30---a value the
+investigator did not report. In such a situation in which the unit of analysis
+is not the same as the unit generalized to, it is a good idea to report the
+reliabilities of both units
+</small>
+</div>
+
+
+##### **Agreement vs. Consistency**
+
+- TK TK
+- TK TK
+
+
+##### **Examples from our work**
+
+We have naive listeners transcribe recordings of children. Each child is
+transcribed by two unique listeners; listeners ever only hear one judge. We
+combine these transcription into a single score. This requires a `one-way,
+agreement-based, average rating` ICC.
+
+  <!-- - If you are doing an interrater reliability "check"---where multiple raters -->
+  <!--   score a subset of the overall data but most of the data was scored by just -->
+  <!--   one rater, use `single rating`. -->
+
+
+#### **Interpreting ICC scores**
+
+##### **We are estimating the similarity of repeated measurements**
+
+The ICC is the *intraclass correlation coefficient*. It provides a way to
+measure the correlation of data within measurement units (classes). For example,
+suppose we give the same assessment to the same 10 children on three occasions. We
+would want the scores to be correlated within each child, so that a child
+attains a similar score on each occasion. The ICC estimates this correlation. 
+
+Now, let's change the example from children tested three times to children who
+visit a research lab once but have their data scored by three different raters
+(or judges or coders). Then the ICC would measure how similar the scores are
+within children. If scores are very similar within children, then the
+differences between judges are small and the judges have high agreement with
+each other. This is how ICC works as a measure of interrater reliability.
+
+
+##### **It compares variation in participants to the overall variation in ratings**
+
+Snijders and Bosker [-@1999multilevel], thinking about individuals nested in groups:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+[The ICC] can be interpreted in two ways: it is the correlation between two
+randomly drawn individuals in one randomly drawn group [i.e, two randomly drawn
+measures from the same, randomly selected measurement unit], and it also the
+fraction of total variability that is due to the group level. [p. 48]
+</small>
+</div>
+
+Most definitions of ICC talk about the variation *between* groups versus the
+variation *within* groups. So, when Snijders and Bosker say "fraction of total
+varability", they have a fraction like the following in mind:
+
+`r "$$"` \
+\\frac{\\text{between-group variation}}{\\text{total variation}} =
+\\frac{\\text{between-group variation}}{\\text{between-group variation} +
+\\text{within-group variation}}
+`r "$$"` \
+
+In the context of interrater reliability, the groups
+are the participants who are being rated. Between-group variation is how the
+participants differ from each other, and within-group variation is how the
+ratings differ within the participants (i.e., between raters). 
+
+Technically, the
+<a href="https://stats.stackexchange.com/a/206433/14825" target="_blank">actual
+fractions</a> to compute ICC scores are more involved than the one above, as
+they account for between-rater variation. Still, Yoder and Symons
+[-@2010observational] support the ICC-as-a-proportion interpretation for
+interrater reliability:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+[The] conceptual meaning of the ICC when measuring interobserver agreement is
+the proportion of the variability in the reliability sample that is due to
+between-participant variance in true score estimates of the behavior of interest
+(Shavelson & Webb, 1991). [p. 175]
+</small>
+</div>
+
+Kreft and De Leeuw [-@kreft1998introducing], thinking about individuals nested
+in groups, do a good job explaining what it means for between-group variation to
+be low compared to within-group variation; that is, what a low ICC means:
+
+<div style = "padding-left: 15px; padding-right: 15px">
+<small>
+If this intra-class correlation is high, groups are homogeneous and/or very
+different from each other. [...] In general, it is true that if this
+intra-class correlation is low, groups are only slightly different from each
+other. If the intra-class correlation is so low that is equal to zero, no group
+differences exist for the variables of interest. People from the same group are
+as different from each other on these variables as people across groups are. A
+zero intra-class correlation means that clustering of the data has no
+consequences for the relationship between the variables of interest [...].
+[p. 4]
+</small>
+</div>
+
+If your reliability check is showing low ICC scores, the differences between the
+judges' ratings are so large that they might as be comparing their ratings for
+different participants.
+
+***
+
+#### **References**
+
+<div id="refs"></div>
+
+
+`r "Column {data-width=300}"`
+-----------------------------------------------------------------------
