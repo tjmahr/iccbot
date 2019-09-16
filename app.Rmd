@@ -19,7 +19,6 @@ library(shiny)
 library(irr)
 library(printy)
 
-
 # Default dataset from Shrout and Fleiss.
 d <- tibble::tibble(
   Judge1 = c(9, 6, 8, 7, 10, 6),
@@ -34,11 +33,6 @@ getData <- function() {
   } else {
     read.csv(input$file1$datapath)
   }
-}
-
-usesTwoWayModel <- function() {
-  req(input$use_twoway_model)
-  input$use_twoway_model == "yes"
 }
 
 runICC <- function() {
@@ -71,9 +65,6 @@ runICC <- function() {
     )
   )
 }
-
-
-
 
 add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
   icc$lbound_p <- icc$lbound %>% 
@@ -164,15 +155,12 @@ selectInput(
   multiple = FALSE 
 )
 
-
 selectInput(
   "single_or_average",
   label = "Do you want the reliability for a single rating or the reliability for the average rating?", 
   choices = c("single rating", "average rating"),
   multiple = FALSE 
 )
-
-
 
 renderUI({
   req(input$use_twoway_model)
@@ -197,8 +185,6 @@ renderUI({
     multiple = FALSE
   )
 })
-
-
 ```
 
 ***
@@ -208,13 +194,15 @@ Developed by TJ Mahr for
 <a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.
 </small>
 
+
+
+
 <span class="fa fa-robot" style="margin-right: 7px;"></span>Run ICC Bot
 ======================================================================
 
 
 Column {data-width=400}
 -----------------------------------------------------------------------
-
 
 ### ICC Bot says
 
@@ -239,7 +227,6 @@ We used `r renderText(i()[["unit_p"]])`, `r renderText(i()[["type_p"]])`,
 Column {data-width=450}
 -----------------------------------------------------------------------
 
-
 ### ICC printout
 
 ```{r}
@@ -253,9 +240,10 @@ renderPrint(head(getData()))
 ```
 
 
+
+
 <span class="fa fa-book" style="margin-right: 7px;"></span>Bot Settings and ICC Interpretation 
 ======================================================================
-
 
 
 ```{r, child="icc-notes.md"}
