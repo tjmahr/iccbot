@@ -17,15 +17,20 @@ library(tidyverse)
 library(flexdashboard)
 library(shiny)
 library(irr)
+library(printy)
 
 
-# Default dataset
-data(anxiety, package = "irr")
-d <- anxiety
+# Default dataset from Shrout and Fleiss.
+d <- tibble::tibble(
+  Judge1 = c(9, 6, 8, 7, 10, 6),
+  Judge2 = c(2, 1, 4, 1,  5, 2),
+  Judge3 = c(5, 3, 6, 2,  6, 4),
+  Judge4 = c(8, 2, 8, 6,  9, 7)
+)
 
 getData <- function() {
   if (is.null(input$file1)) {
-    anxiety
+    d
   } else {
     read.csv(input$file1$datapath)
   }
@@ -95,10 +100,26 @@ add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
     "an average-score"
   )
   
+  icc$unit_p2 <- ifelse(
+    icc$unit == "single", 
+    "raters", 
+    "average ratings"
+  )
+  
   icc$type_p <- ifelse(
     icc$type == "consistency", 
     "consistency-based", 
     "absolute agreement"
+  )
+  
+  icc$raters_p <- ifelse(
+    icc$model == "twoway", 
+    sprintf("%s raters", icc$raters), 
+    sprintf(
+      "%s different raters (%s unique raters)", 
+      icc$raters, 
+      icc$raters *  icc$subjects
+    )
   )
   
   icc
@@ -108,12 +129,14 @@ i <- reactive(list(
   subjects = runICC()[["subjects"]],
   n_trials = runICC()[["raters"]],
   unit_p = runICC()[["unit_p"]],
+  unit_p2 = runICC()[["unit_p2"]],
   type_p = runICC()[["type_p"]],
   model_p = runICC()[["model_p"]],
   icc.name = runICC()[["icc.name"]],
   value = runICC()[["value"]],
   lbound_p = runICC()[["lbound_p"]],
-  ubound_p = runICC()[["ubound_p"]]
+  ubound_p = runICC()[["ubound_p"]],
+  raters_p = runICC()[["raters_p"]]
 ))
 ```
 
@@ -154,14 +177,14 @@ selectInput(
 renderUI({
   req(input$use_twoway_model)
   
-  choices <- if (input$use_twoway_model == "no") {
+  choices <- if (input$use_twoway_model == "no (one-way model)") {
     c("consistency")
   } else {
     c("absolute agreement", "consistency")
   }
   
-  label <- if (input$use_twoway_model == "no") {
-    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> Agreement is not available for oneway models.")
+  label <- if (input$use_twoway_model == "no (one-way model)") {
+    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> Agreement is not available for one-way models.")
     
   } else {
     "Do you want to estimate agreement of raters or consistency of raters?"
@@ -185,7 +208,7 @@ Developed by TJ Mahr for
 <a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.
 </small>
 
-Run ICC Bot
+<span class="fa fa-robot" style="margin-right: 7px;"></span>Run ICC Bot
 ======================================================================
 
 
@@ -199,11 +222,11 @@ We calculated the interrater reliability of [`instrument name`] with the
 intraclass correlation coefficient (ICC) estimated using the irr R package
 [vers. `r packageVersion("irr")`; @R-irr]. Each of the
 `r renderText(i()[["subjects"]])` participants were scored by
-`r renderText(i()[["raters"]])` raters.
+`r renderText(i()[["raters_p"]])`.
 
 We used `r renderText(i()[["unit_p"]])`, `r renderText(i()[["type_p"]])`,
 `r renderText(i()[["model_p"]])` random effects model, and we found
-[`interpert the correlation`] agreement among raters, `r renderText(i()[["icc.name"]])` =
+[`interpret the correlation`] agreement among `r renderText(i()[["unit_p2"]])`, `r renderText(i()[["icc.name"]])` =
 `r renderText(i()[["value"]])`, 95% CI =
 [`r renderText(i()[["lbound_p"]])`,
 `r renderText(i()[["ubound_p"]])`].
@@ -230,8 +253,7 @@ renderPrint(head(getData()))
 ```
 
 
-
-Bot Settings and ICC Interpretation 
+<span class="fa fa-book" style="margin-right: 7px;"></span>Bot Settings and ICC Interpretation 
 ======================================================================
 
 

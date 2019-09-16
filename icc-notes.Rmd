@@ -11,6 +11,14 @@ csl: ./apa.csl
 
 ### `r "Measurement {.no-title}"`
 
+#### **What is the ICC**
+
+The ICC is the *intraclass correlation coefficient*. It provides a way to
+measure the correlation of data within measurement units (classes). For
+interrater reliability checks, it estimates how similar raters' scores are
+within each measurement unit. See the interpretation section below for a longer
+description of the ICC.
+
 #### **What settings should I choose?**
 
 ##### **Repeated raters (two-way) vs. unique raters (one-way)**
@@ -18,7 +26,8 @@ csl: ./apa.csl
 * If raters only ever evaluate one participant each, use `no (one-way model)`.
 * Otherwise, `yes (two-way model)`.
 
-In the one-way model, the data are repeated or grouped in just one way (participants who have multiple ratings). @hallgren2012 elaborates:
+In the one-way model, the data are repeated or grouped in just one way
+(participants who have multiple ratings). @hallgren2012 elaborates:
 
 <div style = "padding-left: 15px; padding-right: 15px">
 <small>
@@ -30,11 +39,11 @@ coders [...] or two-way coder × subject interactions [...].
 </small>
 </div>
  
-In the two-way case, where some raters evaluated multiple participants, there
-is another decision one can make: Whether the
-estimated reliability should generalize to new raters (*two-way random*) or
-raters should be treated as fixed (*two-way mixed*). This app does not support
-the latter option, but it is supported by the `psych::ICC()` function. 
+In the two-way case, where some raters evaluated multiple participants, there is
+another decision one can make: Whether the estimated reliability should
+generalize to new raters (*two-way random*) or raters should be treated as fixed
+(*two-way mixed*). This app does not support the latter option, but it is
+supported by the `psych::ICC()` function. 
 
 In general, if a new person---a new student, clinician, etc.---could be trained
 to perform the rating task, the two-way random is a reasonable default. See how
@@ -104,20 +113,50 @@ reliabilities of both units
 
 ##### **Agreement vs. Consistency**
 
-- TK TK
-- TK TK
+  - If the actual numerical scores should be similar between raters, use
+    `absolute agreement`.
+  - If the instrument is a standardized or diagnostic test, and scores are
+    interpreted with respect to age or sex norms, use `absolute agreement`.
+  - If (just) the rankings of participants should be similar between raters, use
+    `consistency`.
+  - If the raters are unique, as in `no (one-way model)`, only consistency is
+    available.
 
+Suppose you have two teachers, and one of the them has a reputation of being a
+hard grader. They both grade the same five student. The hard grader gives scores
+of 60%, 68%, 78%, 80%, 85%, and the other teacher gives scores
+of 80%, 88%, 98%, 100%, 100%. They give the students the same rankings, but they
+differ in their average score. Because the teachers each rate more than one
+student, this is a two-way model, and because in most contexts, each student
+ever one receives one grade on an assignment, we want to know single score
+reliability. The consistency-based ICC score is ICC(C,1) = .97, so they
+are almost perfectly reliable at ranking the students. The absolute-agreement
+based score is ICC(A,1) = .32, so it is very difficult to compare
+ratings between the teachers. In order to interpret a score, you would want to
+know who the teacher was or you would want to have the teachers grade on curve
+(i.e., renormalize them to remove the average score from each teacher).
+
+In the one-way model, where every rating is done by a unique rater, there is no
+way for assess whether one rater is a harder scorere on average compared to
+another rater. Therefore, only consistency is available for one-way models.
 
 ##### **Examples from our work**
 
-We have naive listeners transcribe recordings of children. Each child is
-transcribed by two unique listeners; listeners ever only hear one judge. We
-combine these transcription into a single score. This requires a `one-way,
-agreement-based, average rating` ICC.
+*Intelligibility ratings*. We have naive listeners transcribe recordings of
+children. Each child is transcribed by two unique listeners; listeners ever only
+hear one judge. We combine these transcriptions into a single score. This
+situation requires a `one-way, consistency-based, average rating` ICC.
 
-  <!-- - If you are doing an interrater reliability "check"---where multiple raters -->
-  <!--   score a subset of the overall data but most of the data was scored by just -->
-  <!--   one rater, use `single rating`. -->
+*Language sample coding*. We have two students in the lab
+transcribe interactions between a parent and child. We want to know whether the
+word counts or utterance counts are similar between transcribers. As a
+reliability check, both students transcribe the same subset of data, but the
+eventual analysis on the larger data will use just one transcription per child.
+This situations requires a `two-way, agreement-based, single rating` ICC.
+
+Generally speaking, for an interrater reliability "check" situation---where
+multiple raters score a subset of the overall data but most of the data was
+scored by just one rater---use `single rating`.
 
 
 #### **Interpreting ICC scores**
@@ -126,9 +165,10 @@ agreement-based, average rating` ICC.
 
 The ICC is the *intraclass correlation coefficient*. It provides a way to
 measure the correlation of data within measurement units (classes). For example,
-suppose we give the same assessment to the same 10 children on three occasions. We
-would want the scores to be correlated within each child, so that a child
-attains a similar score on each occasion. The ICC estimates this correlation. 
+suppose we give the same assessment to the same 10 children on three occasions.
+In general, we would want the scores to be correlated within each child, so that
+a child attains a similar score on each occasion. The ICC estimates this
+correlation.
 
 Now, let's change the example from children tested three times to children who
 visit a research lab once but have their data scored by three different raters
@@ -136,11 +176,17 @@ visit a research lab once but have their data scored by three different raters
 within children. If scores are very similar within children, then the
 differences between judges are small and the judges have high agreement with
 each other. This is how ICC works as a measure of interrater reliability.
-
+ 
 
 ##### **It compares variation in participants to the overall variation in ratings**
 
-Snijders and Bosker [-@1999multilevel], thinking about individuals nested in groups:
+Descriptions of the ICC show in the literature on multilevel or repeated
+measurement data. Think of children nested in different classrooms or
+experimental trials nested in a participant. I mention this context because 
+that's the frame of reference for the texts I quote from.
+
+Snijders and Bosker [-@1999multilevel], thinking about individuals nested in
+groups, provide two interpretations:
 
 <div style = "padding-left: 15px; padding-right: 15px">
 <small>
@@ -151,9 +197,10 @@ fraction of total variability that is due to the group level. [p. 48]
 </small>
 </div>
 
-Most definitions of ICC talk about the variation *between* groups versus the
+In general, the second interpretation is the more common one, and most
+definitions of ICC talk about the variation *between* groups versus the
 variation *within* groups. So, when Snijders and Bosker say "fraction of total
-varability", they have a fraction like the following in mind:
+variability", they have a fraction like the following in mind:
 
 `r "$$"` \
 \\frac{\\text{between-group variation}}{\\text{total variation}} =
