@@ -123,7 +123,7 @@ reliabilities of both units
     available.
 
 Suppose you have two teachers, and one of the them has a reputation of being a
-hard grader. They both grade the same five student. The hard grader gives scores
+hard grader. They both grade the same five students. The hard grader gives scores
 of 60%, 68%, 78%, 80%, 85%, and the other teacher gives scores
 of 80%, 88%, 98%, 100%, 100%. They give the students the same rankings, but they
 differ in their average score. Because the teachers each rate more than one
@@ -137,7 +137,7 @@ know who the teacher was or you would want to have the teachers grade on curve
 (i.e., renormalize them to remove the average score from each teacher).
 
 In the one-way model, where every rating is done by a unique rater, there is no
-way for assess whether one rater is a harder scorere on average compared to
+way to assess whether one rater is a harder scorer on average compared to
 another rater. Therefore, only consistency is available for one-way models.
 
 ##### **Examples from our work**
