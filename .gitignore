@@ -2,3 +2,6 @@
 .RData
 .Rproj.user
 app.html
+icc-notes.md
+rsconnect
+*.csv
