@@ -1,8 +1,0 @@
-https://en.wikipedia.org/wiki/Intraclass_correlation
-
-http://neoacademic.com/2011/11/16/computing-intraclass-correlations-icc-as-estimates-of-interrater-reliability-in-spss/
-
-http://www.john-uebersax.com/stat/icc.htm
-
-https://stats.stackexchange.com/questions/18497/computing-inter-rater-reliability-in-r-with-variable-number-of-ratings
-

@@ -144,7 +144,7 @@ another rater. Therefore, only consistency is available for one-way models.
 
 *Intelligibility ratings*. We have naive listeners transcribe recordings of
 children. Each child is transcribed by two unique listeners; listeners ever only
-hear one judge. We combine these transcriptions into a single score. This
+hear one child. We combine these transcriptions into a single score. This
 situation requires a `one-way, consistency-based, average rating` ICC.
 
 *Language sample coding*. We have two students in the lab
@@ -180,7 +180,7 @@ each other. This is how ICC works as a measure of interrater reliability.
 
 ##### **It compares variation in participants to the overall variation in ratings**
 
-Descriptions of the ICC show in the literature on multilevel or repeated
+The ICC shows up frequently in the literature on multilevel or repeated
 measurement data. Think of children nested in different classrooms or
 experimental trials nested in a participant. I mention this context because 
 that's the frame of reference for the texts I quote from.
