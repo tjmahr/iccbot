@@ -65,6 +65,7 @@ runICC <- function() {
     )
   )
 }
+
 lme4_span <- HTML(
   "<span class=\"citation\">Bates, Mächler, Bolker, &amp; Walker, 2015</span>"
 )
@@ -96,9 +97,9 @@ i <- reactive(list(
   citation = if (runICC()[["engine"]] == "lme4") {
     glue::glue('
       the R packages lme4 (vers. {packageVersion("lme4")}; {lme4_span}) 
-      and irr ({packageVersion("irr")}; {irr_span})')
+      and irr (vers. {packageVersion("irr")}; {irr_span})')
   } else {
-    glue::glue('the irr R package ({packageVersion("irr")}; {irr_span})')
+    glue::glue('the irr R package (vers. {packageVersion("irr")}; {irr_span})')
   }
 ))
 ```
