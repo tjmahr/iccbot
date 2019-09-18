@@ -1,3 +1,7 @@
+#' @importFrom stats na.omit pf qf
+#' @importFrom rlang .data
+NULL
+
 #' @export
 example_shrout_fleiss <- function() {
   tibble::tibble(
@@ -9,56 +13,182 @@ example_shrout_fleiss <- function() {
 }
 
 #' @export
+example_shrout_fleiss_nas_1 <- function() {
+  tibble::tibble(
+    Judge1 = c(NA, NA,  8,  7, 10,  6),
+    Judge2 = c(NA, NA, NA, NA,  5,  2),
+    Judge3 = c( 5,  3, NA, NA, NA, NA),
+    Judge4 = c( 8,  2,  8,  6, NA, NA)
+  )
+}
+
+#' @export
+example_shrout_fleiss_nas_2 <- function() {
+  tibble::tibble(
+    Judge1 = c(9, 6, 8, 7, 10, 6),
+    Judge2 = c(2, 1, 4, 1,  5, 2),
+    Judge3 = c(5, 3, 6, 2,  6, 4),
+    Judge4 = c(8, 2, 8, 6,  9, NA)
+  )
+}
+
+
+
+
+#' @export
 run_icc <- function(
   ratings,
   model = c("oneway", "twoway"),
   type = c("consistency", "agreement"),
   unit = c("single", "average"),
   r0 = 0,
-  conf.level = 0.95
+  conf.level = 0.95,
+  engine = "lme4"
 ) {
 
   model <- match.arg(model)
   type <- match.arg(type)
   unit <- match.arg(unit)
-  alpha <- 1 - conf.level
 
-  d_long <- ratings %>%
-    tibble::rowid_to_column("subj") %>%
-    tidyr::gather(judge, rating, -subj)
+  if (engine == "lme4") {
+    ms_list <- decompose_variance_with_lme4(ratings)
+    data_stats <- analyze_data(ratings)
+    icc <- compute_icc(
+      ns = ms_list$n_participant,
+      nr = ms_list$n_rater,
+      MSr = ms_list$MSB,
+      MSw = ms_list$MSW,
+      MSc = ms_list$MSJ,
+      MSe = ms_list$MSE,
+      model = model,
+      type = type,
+      unit = unit,
+      r0 = r0,
+      conf.level = conf.level
+    )
+  } else  if (engine == "aov") {
+    ms_list <- decompose_variance_with_aov(na.omit(ratings))
+    data_stats <- analyze_data(na.omit(ratings))
+    icc <- compute_icc(
+      ns = ms_list$n_participant,
+      nr = ms_list$n_rater,
+      MSr = ms_list$MSB,
+      MSw = ms_list$MSW,
+      MSc = ms_list$MSJ,
+      MSe = ms_list$MSE,
+      model = model,
+      type = type,
+      unit = unit,
+      r0 = r0,
+      conf.level = conf.level
+    )
+  } else {
+    engine <- "irr"
+    data_stats <- analyze_data(na.omit(ratings))
+    icc <- irr::icc(
+      ratings,
+      model = model,
+      type = type,
+      unit = unit,
+      r0 = r0,
+      conf.level = conf.level
+    )
+  }
+  icc$engine <- engine
+  icc[names(data_stats)] <- data_stats
+  icc
+}
 
+analyze_data <- function(ratings) {
+  l <- list()
+  l$n_ratings <- sum(!is.na(ratings))
+  l$n_ratings_missing <- sum(is.na(ratings))
+
+  l$min_ratings_per_participant <- ratings %>%
+    apply(1, function(x) sum(!is.na(x))) %>%
+    min()
+  l$max_ratings_per_participant <- ratings %>%
+    apply(1, function(x) sum(!is.na(x))) %>%
+    max()
+  l$min_participants_per_rater <- ratings %>%
+    apply(2, function(x) sum(!is.na(x))) %>%
+    min()
+  l$max_participants_per_rater <- ratings %>%
+    apply(2, function(x) sum(!is.na(x))) %>%
+    max()
+
+  l
+}
+
+#' @export
+decompose_variance_with_lme4 <- function(data) {
+  data_long <- data %>%
+    tibble::rowid_to_column("participant") %>%
+    tidyr::gather("rater", "rating", -.data$participant) %>%
+    dplyr::mutate(
+      participant = paste0("S", .data$participant)
+    )
   mixed_model <- lme4::lmer(
-    rating ~ 1 + (1 | judge) + (1 | subj), data = d_long
+    rating ~ 1 + (1 | rater) + (1 | participant),
+    data = data_long
   )
 
   vc <- lme4::VarCorr(mixed_model)
-  MS_judge <- vc$judge[1, 1]
-  MS_subj <- vc$subj[1, 1]
+
+  MS_rater <- vc$rater[1, 1]
+  MS_participant <- vc$participant[1, 1]
   MSE <- attr(vc, "sc") ^ 2
 
-  n_subj <- nrow(ratings)
-  n_judge <- ncol(ratings)
+  n_rater <- unname(lme4::ngrps(mixed_model)["rater"])
+  n_participant <- unname(lme4::ngrps(mixed_model)["participant"])
 
-  MSB <- n_judge * MS_subj  + MSE
-  MSJ <- n_subj  * MS_judge + MSE
-  MSW <- MS_judge + MSE
+  MSW <- MS_rater + MSE
+  MSB <- MS_participant * n_rater + MSE
+  MSJ <- MS_rater * n_participant + MSE
 
-  icc <- compute_icc(
-    ns = n_subj,
-    nr = n_judge,
-    MSr = MSB,
-    MSw = MSW,
-    MSc = MSJ,
-    MSe = MSE,
-    model = model,
-    type = type,
-    unit = unit,
-    r0 = r0,
-    conf.level = conf.level
+  list(
+    n_rater = n_rater,
+    n_participant = n_participant,
+    MSW = MSW,
+    MSB = MSB,
+    MSJ = MSJ,
+    MSE = MSE
   )
+}
 
-  icc$lme4 <- mixed_model
-  icc
+#' @export
+decompose_variance_with_aov <- function(data) {
+  data_long <- data %>%
+    tibble::rowid_to_column("participant") %>%
+    dplyr::mutate(
+      participant = paste0("S", .data$participant)
+    ) %>%
+    tidyr::gather("rater", "rating", -.data$participant)
+
+  anova_df <- stats::aov(rating ~ participant + rater, data_long) %>%
+    summary() %>%
+    getElement(1)
+
+  MSB <- anova_df["participant", "Mean Sq"]
+  MSJ <- anova_df["rater", "Mean Sq"]
+  MSE <- anova_df["Residuals", "Mean Sq"]
+
+  DFJ <- anova_df["rater", "Df"]
+  DFE <- anova_df["Residuals", "Df"]
+
+  SSJ <- anova_df["rater", "Sum Sq"]
+  SSE <- anova_df["Residuals", "Sum Sq"]
+
+  MSW <- (SSJ + SSE) / (DFJ + DFE)
+
+  list(
+    n_rater = ncol(data),
+    n_participant = nrow(data),
+    MSW = MSW,
+    MSB = MSB,
+    MSJ = MSJ,
+    MSE = MSE
+  )
 }
 
 #' This is the core of the irr::icc() function
@@ -220,15 +350,50 @@ add_formatted_results_to_icc <- function(icc, icc_digits = 3) {
     "absolute agreement"
   )
 
-  icc$raters_p <- ifelse(
-    icc$model == "twoway",
-    sprintf("%s raters", icc$raters),
-    sprintf(
-      "%s different raters (%s unique raters)",
-      icc$raters,
-      icc$raters *  icc$subjects
+
+  if (icc$n_ratings_missing == 0) {
+    p_sub <- if (icc$model == "oneway") {
+      glue::glue("{icc$raters} different raters ({icc$n_ratings} unique raters)")
+    } else {
+      glue::glue("{icc$raters} raters")
+    }
+    p <- glue::glue(
+      "
+      Each of the {icc$subjects} participants
+      were scored by {p_sub}.
+      "
     )
-  )
+  } else {
+    if (icc$min_ratings_per_participant == icc$max_ratings_per_participant) {
+      n_raters2 <- icc$max_ratings_per_participant
+    } else {
+      n_raters2 <- paste0(
+        icc$min_ratings_per_participant,
+        "&ndash;",
+        icc$max_ratings_per_participant
+      )
+    }
+    if (icc$min_participants_per_rater == icc$max_participants_per_rater) {
+      n_participants_2 <- icc$max_participants_per_rater
+    } else {
+      n_participants_2 <- paste0(
+        icc$min_participants_per_rater,
+        "&ndash;",
+        icc$max_participants_per_rater
+      )
+    }
+    p_sub <- if (icc$model == "oneway") {
+      glue::glue("{n_raters2} different raters ({icc$n_ratings} unique raters)")
+    } else {
+      glue::glue("{n_raters2} raters. Each of the {icc$raters} raters
+      scored {n_participants_2} participants")
+    }
+    p <- glue::glue("Each of the {icc$subjects} participants were scored
+      by {p_sub}."
+    )
+  }
+
+  icc$rater_participant_counts_p <- p
 
   icc
 }

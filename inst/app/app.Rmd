@@ -52,15 +52,25 @@ runICC <- function() {
     "consistency"
   )
   
+  missing_data <- anyNA(getData())
+  engine <- ifelse(missing_data, "lme4", "irr")
+    
   add_formatted_results_to_icc(
     run_icc(
       getData(),
       model = model,
       unit = unit,
-      type = type
+      type = type,
+      engine = engine
     )
   )
 }
+lme4_span <- HTML(
+  "<span class=\"citation\">Bates, Mächler, Bolker, &amp; Walker, 2015</span>"
+)
+irr_span <- HTML(
+  "<span class=\"citation\">Gamer, Lemon, Fellows, &amp; Singh, 2019</span>"
+)
 
 i <- reactive(list(
   subjects = runICC()[["subjects"]],
@@ -73,11 +83,25 @@ i <- reactive(list(
   value = runICC()[["value"]],
   lbound_p = runICC()[["lbound_p"]],
   ubound_p = runICC()[["ubound_p"]],
-  raters_p = runICC()[["raters_p"]]
+  raters_p = runICC()[["raters_p"]],
+  rater_participant_counts_p = runICC()[["rater_participant_counts_p"]],
+  engine = runICC()[["engine"]],
+  n_ratings = runICC()[["n_ratings"]],
+  n_ratings_missing = runICC()[["n_ratings_missing"]],
+  rater_participant_counts_p = runICC()[["rater_participant_counts_p"]],
+  min_ratings_per_participant = runICC()[["min_ratings_per_participant"]],
+  max_ratings_per_participant = runICC()[["max_ratings_per_participant"]],
+  min_participants_per_rater = runICC()[["min_participants_per_rater"]],
+  max_participants_per_rater = runICC()[["max_participants_per_rater"]],
+  citation = if (runICC()[["engine"]] == "lme4") {
+    glue::glue('
+      the R packages lme4 (vers. {packageVersion("lme4")}; {lme4_span}) 
+      and irr ({packageVersion("irr")}; {irr_span})')
+  } else {
+    glue::glue('the irr R package ({packageVersion("irr")}; {irr_span})')
+  }
 ))
 ```
-
-
 
 Column {.sidebar}
 ======================================================================
@@ -118,8 +142,8 @@ renderUI({
   }
   
   label <- if (input$use_twoway_model == "no (one-way model)") {
-    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> Agreement is not available for one-way models.")
-    
+    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> 
+         Agreement is not available for one-way models.")
   } else {
     "Do you want to estimate agreement of raters or consistency of raters?"
   }
@@ -153,31 +177,66 @@ Column {data-width=400}
 ### ICC Bot says
 
 We calculated the interrater reliability of [`instrument name`] with the
-intraclass correlation coefficient (ICC) estimated using the R packages lme4
-[vers. `r packageVersion("lme4")`; @lme4] and irr 
-[vers. `r packageVersion("irr")`; @R-irr]. Each of the
-`r renderText(i()[["subjects"]])` participants were scored by
-`r renderText(i()[["raters_p"]])`.
+intraclass correlation coefficient (ICC) estimated using
+`r renderUI(HTML(i()[["citation"]]))`.
+`r renderUI(HTML(i()[["rater_participant_counts_p"]]))`
 
 We used `r renderText(i()[["unit_p"]])`, `r renderText(i()[["type_p"]])`,
-`r renderText(i()[["model_p"]])` random effects model, and we found
-[`interpret the correlation`] agreement among `r renderText(i()[["unit_p2"]])`, `r renderText(i()[["icc.name"]])` =
-`r renderText(i()[["value"]])`, 95% CI =
-[`r renderText(i()[["lbound_p"]])`,
-`r renderText(i()[["ubound_p"]])`].
+`r renderText(i()[["model_p"]])` random effects model, and we found [`interpret
+the correlation`] agreement among `r renderText(i()[["unit_p2"]])`,
+`r renderText(i()[["icc.name"]])` = `r renderText(i()[["value"]])`, 95% CI =
+[`r renderText(i()[["lbound_p"]])`, `r renderText(i()[["ubound_p"]])`].
 
 ***
 
-<div id="refs"></div>
-
+```{r dynamic-bibliography}
+renderUI(
+  if (i()["engine"] == "lme4") {
+    HTML(
+      '<div id="section-refs">
+      <div id="section-ref-lme4">
+      <p>Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). 
+      Fitting linear mixed-effects models using lme4. 
+      <em>Journal of Statistical Software</em>, <em>67</em>(1), 1–48. 
+      <a href="https://doi.org/10.18637/jss.v067.i01">
+      https://doi.org/10.18637/jss.v067.i01</a></p>
+      </div>
+      <div id="section-ref-R-irr">
+      <p>Gamer, M., Lemon, J., Fellows, I., &amp; Singh, P. (2019). 
+      <em>irr: Various coefficients of interrater reliability and agreement</em>. 
+      Retrieved from <a href="https://CRAN.R-project.org/package=irr">
+      https://CRAN.R-project.org/package=irr</a></p>
+      </div>
+      </div>'
+  )
+  } else {
+    HTML(
+      '<div id="section-refs">
+      <div id="section-ref-R-irr">
+      <p>Gamer, M., Lemon, J., Fellows, I., &amp; Singh, P. (2019). 
+      <em>irr: Various coefficients of interrater reliability and agreement</em>. 
+      Retrieved from <a href="https://CRAN.R-project.org/package=irr">
+      https://CRAN.R-project.org/package=irr</a></p>
+      </div>
+      </div>'
+    )
+  }
+)
+```
 
 Column {data-width=450}
 -----------------------------------------------------------------------
 
 ### ICC printout
 
-```{r}
+```{r, collapse = TRUE}
 renderPrint(runICC())
+renderPrint(cat(
+  "ICCBot details", "\n",
+  "Variance computed by package: ", i()[["engine"]], "\n",
+  "N ratings: ", i()[["n_ratings"]], "\n",
+  "N missing ratings: ", i()[["n_ratings_missing"]], sep = ""
+))
 ```
 
 ### First six rows of data
