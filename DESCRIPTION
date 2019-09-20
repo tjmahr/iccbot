@@ -1,13 +1,14 @@
 Package: iccbot
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: A 'Shiny' App for ICC Statistics
+Version: 0.0.1.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+	person("Tristan", 
+		"Mahr", 
+		role = c("aut", "cre"),
+		email = "tristan.mahr@wisc.edu",
+		comment = c(ORCID = "0000-0002-8890-5116"))
+Description: An interactive dashboard for computing intraclass correlation 
+    coefficients to estimate interrater reliability.
 License: GPL-3
 Suggests: 
     testthat (>= 2.1.0),
