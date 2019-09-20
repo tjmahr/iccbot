@@ -1,0 +1,256 @@
+---
+title: ICC Bot
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+    theme: yeti
+    source_code: https://github.com/tjmahr/iccbot
+    md_extensions: "-tex_math_single_backslash"
+runtime: shiny
+bibliography: refs.bib
+csl: apa.csl
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(flexdashboard)
+library(shiny)
+library(irr)
+library(printy)
+library(iccbot)
+
+# Default dataset from Shrout and Fleiss.
+d <- example_shrout_fleiss()
+
+getData <- function() {
+  if (is.null(input$file1)) {
+    d
+  } else {
+    read.csv(input$file1$datapath)
+  }
+}
+
+runICC <- function() {
+  req(input$use_twoway_model)
+  req(input$single_or_average)
+  req(input$agreement_or_consistency)
+  
+  model <- ifelse(
+    input$use_twoway_model == "yes (two-way model)", 
+    "twoway", 
+    "oneway"
+  )
+  unit  <- ifelse(
+    input$single_or_average == "single rating", 
+    "single", 
+    "average"
+  )
+  type <- ifelse(
+    input$agreement_or_consistency == "absolute agreement", 
+    "agreement", 
+    "consistency"
+  )
+  
+  missing_data <- anyNA(getData())
+  engine <- ifelse(missing_data, "lme4", "irr")
+    
+  add_formatted_results_to_icc(
+    run_icc(
+      getData(),
+      model = model,
+      unit = unit,
+      type = type,
+      engine = engine
+    )
+  )
+}
+
+lme4_span <- HTML(
+  "<span class=\"citation\">Bates, Mächler, Bolker, &amp; Walker, 2015</span>"
+)
+irr_span <- HTML(
+  "<span class=\"citation\">Gamer, Lemon, Fellows, &amp; Singh, 2019</span>"
+)
+
+i <- reactive(list(
+  subjects = runICC()[["subjects"]],
+  n_trials = runICC()[["raters"]],
+  unit_p = runICC()[["unit_p"]],
+  unit_p2 = runICC()[["unit_p2"]],
+  type_p = runICC()[["type_p"]],
+  model_p = runICC()[["model_p"]],
+  icc.name = runICC()[["icc.name"]],
+  value = runICC()[["value"]],
+  lbound_p = runICC()[["lbound_p"]],
+  ubound_p = runICC()[["ubound_p"]],
+  raters_p = runICC()[["raters_p"]],
+  rater_participant_counts_p = runICC()[["rater_participant_counts_p"]],
+  engine = runICC()[["engine"]],
+  n_ratings = runICC()[["n_ratings"]],
+  n_ratings_missing = runICC()[["n_ratings_missing"]],
+  rater_participant_counts_p = runICC()[["rater_participant_counts_p"]],
+  min_ratings_per_participant = runICC()[["min_ratings_per_participant"]],
+  max_ratings_per_participant = runICC()[["max_ratings_per_participant"]],
+  min_participants_per_rater = runICC()[["min_participants_per_rater"]],
+  max_participants_per_rater = runICC()[["max_participants_per_rater"]],
+  citation = if (runICC()[["engine"]] == "lme4") {
+    glue::glue('
+      the R packages lme4 (vers. {packageVersion("lme4")}; {lme4_span}) 
+      and irr (vers. {packageVersion("irr")}; {irr_span})')
+  } else {
+    glue::glue('the irr R package (vers. {packageVersion("irr")}; {irr_span})')
+  }
+))
+```
+
+Column {.sidebar}
+======================================================================
+
+Upload a csv file of scores with one column per rater and no other columns.
+
+```{r, echo = FALSE}
+fileInput(
+  "file1", 
+  "Choose CSV File", 
+  accept = c(
+    "text/csv",
+    "text/comma-separated-values,text/plain",
+    ".csv")
+)
+
+selectInput(
+  "use_twoway_model",
+  label = "Do raters evaluate more than one participant?", 
+  choices = c("yes (two-way model)", "no (one-way model)"), 
+  multiple = FALSE 
+)
+
+selectInput(
+  "single_or_average",
+  label = "Do you want the reliability for a single rating or the reliability for the average rating?", 
+  choices = c("single rating", "average rating"),
+  multiple = FALSE 
+)
+
+renderUI({
+  req(input$use_twoway_model)
+  
+  choices <- if (input$use_twoway_model == "no (one-way model)") {
+    c("consistency")
+  } else {
+    c("absolute agreement", "consistency")
+  }
+  
+  label <- if (input$use_twoway_model == "no (one-way model)") {
+    HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> 
+         Agreement is not available for one-way models.")
+  } else {
+    "Do you want to estimate agreement of raters or consistency of raters?"
+  }
+  
+  selectInput(
+    "agreement_or_consistency",
+    label = label, 
+    choices = choices,
+    multiple = FALSE
+  )
+})
+```
+
+***
+
+<small>
+Developed by TJ Mahr for
+<a href="https://kidspeech.wisc.edu/" target="_blank">The WISC Lab</a>.
+</small>
+
+
+
+
+<span class="fa fa-robot" style="margin-right: 7px;"></span>Run ICC Bot
+======================================================================
+
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### ICC Bot says
+
+We calculated the interrater reliability of [`instrument name`] with the
+intraclass correlation coefficient (ICC) estimated using
+`r renderUI(HTML(i()[["citation"]]))`.
+`r renderUI(HTML(i()[["rater_participant_counts_p"]]))`
+
+We used `r renderText(i()[["unit_p"]])`, `r renderText(i()[["type_p"]])`,
+`r renderText(i()[["model_p"]])` random effects model, and we found [`interpret
+the correlation`] agreement among `r renderText(i()[["unit_p2"]])`,
+`r renderText(i()[["icc.name"]])` = `r renderText(i()[["value"]])`, 95% CI =
+[`r renderText(i()[["lbound_p"]])`, `r renderText(i()[["ubound_p"]])`].
+
+***
+
+```{r dynamic-bibliography}
+renderUI(
+  if (i()["engine"] == "lme4") {
+    HTML(
+      '<div id="section-refs">
+      <div id="section-ref-lme4">
+      <p>Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). 
+      Fitting linear mixed-effects models using lme4. 
+      <em>Journal of Statistical Software</em>, <em>67</em>(1), 1–48. 
+      <a href="https://doi.org/10.18637/jss.v067.i01">
+      https://doi.org/10.18637/jss.v067.i01</a></p>
+      </div>
+      <div id="section-ref-R-irr">
+      <p>Gamer, M., Lemon, J., Fellows, I., &amp; Singh, P. (2019). 
+      <em>irr: Various coefficients of interrater reliability and agreement</em>. 
+      Retrieved from <a href="https://CRAN.R-project.org/package=irr">
+      https://CRAN.R-project.org/package=irr</a></p>
+      </div>
+      </div>'
+  )
+  } else {
+    HTML(
+      '<div id="section-refs">
+      <div id="section-ref-R-irr">
+      <p>Gamer, M., Lemon, J., Fellows, I., &amp; Singh, P. (2019). 
+      <em>irr: Various coefficients of interrater reliability and agreement</em>. 
+      Retrieved from <a href="https://CRAN.R-project.org/package=irr">
+      https://CRAN.R-project.org/package=irr</a></p>
+      </div>
+      </div>'
+    )
+  }
+)
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+### ICC printout
+
+```{r, collapse = TRUE}
+renderPrint(runICC())
+renderPrint(cat(
+  "ICCBot details", "\n",
+  "Variance computed by package: ", i()[["engine"]], "\n",
+  "N ratings: ", i()[["n_ratings"]], "\n",
+  "N missing ratings: ", i()[["n_ratings_missing"]], sep = ""
+))
+```
+
+### First six rows of data
+
+```{r}
+renderPrint(head(getData()))
+```
+
+
+
+
+<span class="fa fa-book" style="margin-right: 7px;"></span>Bot Settings and ICC Interpretation 
+======================================================================
+
+
+__notes_here__

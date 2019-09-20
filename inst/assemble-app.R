@@ -1,19 +1,5 @@
 library(tidyverse)
 
-# # Code for the example in icc-notes.Rmd
-# t1 <- c(60, 68, 78, 80, 85)
-# t2 <- c(80, 88, 98, 100, 100)
-# t1a <- c(60, 68, 78, 80, 85) - mean(t1)
-# t2a <- c(80, 88, 98, 100, 100) - mean(t2)
-# demo1 <- matrix(c(t1, t2), ncol = 2)
-# demo1a <- matrix(c(t1a, t2a), ncol = 2)
-# i1 <- irr::icc(demo1, model = "twoway",  type = "consistency")
-# i2 <- irr::icc(demo1, model = "twoway", type = "agreement")
-# i1a <- irr::icc(demo1a, model = "twoway",  type = "consistency")
-# i2a <- irr::icc(demo1a, model = "twoway", type = "agreement")
-# i1 <- add_formatted_results_to_icc(i1, icc_digits = 2)
-# i2 <- add_formatted_results_to_icc(i2, icc_digits = 2)
-
 # Build the ICC Notes page separately so that the references there are
 # plugged in and don't interfere with the references on the main app page
 rmarkdown::pandoc_convert(
@@ -35,4 +21,13 @@ readr::read_lines(here::here("inst/app/icc-notes.md")) %>%
   stringr::str_replace_all("[\\\\]{2}", "\\\\") %>%
   readr::write_lines(here::here("inst/app/icc-notes.md"))
 
-rmarkdown::run(here::here("inst/app/app.Rmd"))
+# Insert the notes into the main app so that only file is needed to run app
+document <- readr::read_lines(here::here("inst/app/app-skeleton.Rmd"))
+
+document[which(document == "__notes_here__")] <-
+  readr::read_file(here::here("inst/app/icc-notes.md"))
+
+document %>%
+  readr::write_lines(
+    here::here("inst/app/app.Rmd")
+  )
