@@ -26,6 +26,9 @@ Imports:
     glue,
     irr,
     rlang,
-    lme4
+    lme4,
+    rmarkdown,
+    flexdashboard,
+    shiny
 Remotes: 
     tjmahr/printy
