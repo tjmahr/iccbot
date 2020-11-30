@@ -1,6 +1,6 @@
 Package: iccbot
 Title: A 'Shiny' App for ICC Statistics
-Version: 0.0.1.9000
+Version: 0.0.2
 Authors@R: 
 	person("Tristan", 
 		"Mahr", 

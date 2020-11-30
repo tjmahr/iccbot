@@ -4,7 +4,7 @@ library(tidyverse)
 # plugged in and don't interfere with the references on the main app page
 rmarkdown::pandoc_convert(
   here::here("inst/app/icc-notes.Rmd"),
-  to = "gfm-tex_math_single_backslash-tex_math_double_backslash+tex_math_dollars",
+  to = "gfm+tex_math_dollars",
   from = "markdown+autolink_bare_uris+citations+header_attributes-tex_math_single_backslash+tex_math_dollars",
   output = here::here("inst/app/icc-notes.md"),
   citeproc = TRUE

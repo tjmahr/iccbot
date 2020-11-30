@@ -137,14 +137,14 @@ renderUI({
   req(input$use_twoway_model)
   
   choices <- if (input$use_twoway_model == "no (one-way model)") {
-    c("consistency")
+    c("absolute agreement")
   } else {
     c("absolute agreement", "consistency")
   }
   
   label <- if (input$use_twoway_model == "no (one-way model)") {
     HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> 
-         Agreement is not available for one-way models.")
+         Consistency is not available for one-way models.")
   } else {
     "Do you want to estimate agreement of raters or consistency of raters?"
   }
@@ -234,6 +234,7 @@ Column {data-width=450}
 renderPrint(runICC())
 renderPrint(cat(
   "ICCBot details", "\n",
+  "iccbot version: ", format(utils::packageVersion("iccbot")), "\n",
   "Variance computed by package: ", i()[["engine"]], "\n",
   "N ratings: ", i()[["n_ratings"]], "\n",
   "N missing ratings: ", i()[["n_ratings_missing"]], sep = ""
@@ -253,7 +254,8 @@ renderPrint(head(getData()))
 ======================================================================
 
 
-## `r "Column {data-width=600}"`
+`r "Column {data-width=600}"`
+-----------------------------
 
 ### `r "Measurement {.no-title}"`
 
@@ -269,9 +271,9 @@ below for a longer description of the ICC.
 
 ##### **Repeated raters (two-way) vs. unique raters (one-way)**
 
-  - If raters only ever evaluate one participant each, use `no (one-way
-    model)`.
-  - Otherwise, `yes (two-way model)`.
+-   If raters only ever evaluate one participant each, use
+    `no (one-way model)`.
+-   Otherwise, `yes (two-way model)`.
 
 In the one-way model, the data are repeated or grouped in just one way
 (participants who have multiple ratings). Hallgren (2012) elaborates:
@@ -311,11 +313,11 @@ study. </small>
 
 ##### **Single rating vs. Average rating**
 
-  - If your eventual analysis will use just one rating per participant,
+-   If your eventual analysis will use just one rating per participant,
     use `single rating`.
-  - If everyone was rated by more than one rater and you plan to add,
+-   If everyone was rated by more than one rater and you plan to add,
     combine or average the ratings together in your eventual analysis,
-    use `average rating`.
+    use `average     rating`.
 
 Yoder and Symons (2010) spell out the difference:
 
@@ -361,15 +363,15 @@ to report the reliabilities of both units </small>
 
 ##### **Agreement vs. Consistency**
 
-  - If the actual numerical scores should be similar between raters, use
+-   If the actual numerical scores should be similar between raters, use
     `absolute agreement`.
-  - If the instrument is a standardized or diagnostic test, and scores
-    are interpreted with respect to age or sex norms, use `absolute
-    agreement`.
-  - If (just) the rankings of participants should be similar between
+-   If the instrument is a standardized or diagnostic test, and scores
+    are interpreted with respect to age or sex norms, use
+    `absolute agreement`.
+-   If (just) the rankings of participants should be similar between
     raters, use `consistency`.
-  - If the raters are unique, as in `no (one-way model)`, only
-    consistency is available.
+-   If the raters are unique, as in `no (one-way model)`, only agreement
+    is available.
 
 Suppose you have two teachers, and one of the them has a reputation of
 being a hard grader. They both grade the same five students. The hard
@@ -388,8 +390,9 @@ curve (i.e., renormalize them to remove the average score from each
 teacher).
 
 In the one-way model, where every rating is done by a unique rater,
-there is no way to assess whether one rater is a harder scorer on
-average compared to another rater. Therefore, only consistency is
+there is no way to assess whether one rater is a consistently harder
+scorer compared to another rater. The only differences are absolute
+differences from each other. Therefore, only absolute agreement is
 available for one-way models.
 
 ##### **Examples from our work**
@@ -397,16 +400,16 @@ available for one-way models.
 *Intelligibility ratings*. We have naive listeners transcribe recordings
 of children. Each child is transcribed by two unique listeners;
 listeners ever only hear one child. We combine these transcriptions into
-a single score. This situation requires a `one-way, consistency-based,
-average rating` ICC.
+a single score. This situation requires a
+`one-way, agreement-based, average rating` ICC.
 
 *Language sample coding*. We have two students in the lab transcribe
 interactions between a parent and child. We want to know whether the
 word counts or utterance counts are similar between transcribers. As a
 reliability check, both students transcribe the same subset of data, but
 the eventual analysis on the larger data will use just one transcription
-per child. This situations requires a `two-way, agreement-based, single
-rating` ICC.
+per child. This situations requires a
+`two-way, agreement-based, single rating` ICC.
 
 Generally speaking, for an interrater reliability “check”
 situation—where multiple raters score a subset of the overall data but
@@ -454,7 +457,7 @@ variability that is due to the group level. [p. 48] </small>
 In general, the second interpretation is the more common one, and most
 definitions of ICC talk about the variation *between* groups versus the
 variation *within* groups. So, when Snijders and Bosker say “fraction of
-total variability”, they have a fraction like the following in mind:
+total variability,” they have a fraction like the following in mind:
 
 `r "$$"`  
 \frac{\text{between-group variation}}{\text{total variation}} =
@@ -506,13 +509,13 @@ If your reliability check is showing low ICC scores, the differences
 between the judges’ ratings are so large that they might as be comparing
 their ratings for different participants.
 
------
+------------------------------------------------------------------------
 
 #### **References**
 
-<div id="refs2">
+<div id="refs2" class="references csl-bib-body hanging-indent">
 
-<div id="ref-hallgren2012">
+<div id="ref-hallgren2012" class="csl-entry">
 
 Hallgren, K. A. (2012). Computing inter-rater reliability for
 observational data: An overview and tutorial. *Tutorials in Quantitative
@@ -521,7 +524,7 @@ Methods for Psychology*, *8*(1), 23–34.
 
 </div>
 
-<div id="ref-koo2016">
+<div id="ref-koo2016" class="csl-entry">
 
 Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting
 intraclass correlation coefficients for reliability research. *Journal
@@ -530,14 +533,14 @@ of Chiropractic Medicine*, *15*(2), 155–163.
 
 </div>
 
-<div id="ref-kreft1998introducing">
+<div id="ref-kreft1998introducing" class="csl-entry">
 
 Kreft, I., & Leeuw, J. de. (1998). *Introducing multilevel modeling*.
 Sage.
 
 </div>
 
-<div id="ref-icc1979">
+<div id="ref-icc1979" class="csl-entry">
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
 assessing rater reliaility. *Psychological Bulletin*, *86*(2), 420–428.
@@ -545,14 +548,14 @@ assessing rater reliaility. *Psychological Bulletin*, *86*(2), 420–428.
 
 </div>
 
-<div id="ref-1999multilevel">
+<div id="ref-1999multilevel" class="csl-entry">
 
 Snijders, T. A. B., & Bosker, R. J. (1999). *Multilevel analysis: An
 introduction to basic and advanced multilevel modeling*. Sage.
 
 </div>
 
-<div id="ref-2010observational">
+<div id="ref-2010observational" class="csl-entry">
 
 Yoder, P., & Symons, F. (2010). *Observational measurement of behavior*.
 Springer Publishing Company.
@@ -561,5 +564,6 @@ Springer Publishing Company.
 
 </div>
 
-## `r "Column {data-width=300}"`
+`r "Column {data-width=300}"`
+-----------------------------
 

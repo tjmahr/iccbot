@@ -137,14 +137,14 @@ renderUI({
   req(input$use_twoway_model)
   
   choices <- if (input$use_twoway_model == "no (one-way model)") {
-    c("consistency")
+    c("absolute agreement")
   } else {
     c("absolute agreement", "consistency")
   }
   
   label <- if (input$use_twoway_model == "no (one-way model)") {
     HTML("<s>Do you want to estimate agreement of raters or consistency of raters?</s> 
-         Agreement is not available for one-way models.")
+         Consistency is not available for one-way models.")
   } else {
     "Do you want to estimate agreement of raters or consistency of raters?"
   }
@@ -234,6 +234,7 @@ Column {data-width=450}
 renderPrint(runICC())
 renderPrint(cat(
   "ICCBot details", "\n",
+  "iccbot version: ", format(utils::packageVersion("iccbot")), "\n",
   "Variance computed by package: ", i()[["engine"]], "\n",
   "N ratings: ", i()[["n_ratings"]], "\n",
   "N missing ratings: ", i()[["n_ratings_missing"]], sep = ""

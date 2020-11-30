@@ -119,7 +119,7 @@ reliabilities of both units
     interpreted with respect to age or sex norms, use `absolute agreement`.
   - If (just) the rankings of participants should be similar between raters, use
     `consistency`.
-  - If the raters are unique, as in `no (one-way model)`, only consistency is
+  - If the raters are unique, as in `no (one-way model)`, only agreement is
     available.
 
 Suppose you have two teachers, and one of the them has a reputation of being a
@@ -137,15 +137,16 @@ know who the teacher was or you would want to have the teachers grade on curve
 (i.e., renormalize them to remove the average score from each teacher).
 
 In the one-way model, where every rating is done by a unique rater, there is no
-way to assess whether one rater is a harder scorer on average compared to
-another rater. Therefore, only consistency is available for one-way models.
+way to assess whether one rater is a consistently harder scorer compared to
+another rater. The only differences are absolute differences from each other. 
+Therefore, only absolute agreement is available for one-way models.
 
 ##### **Examples from our work**
 
 *Intelligibility ratings*. We have naive listeners transcribe recordings of
 children. Each child is transcribed by two unique listeners; listeners ever only
 hear one child. We combine these transcriptions into a single score. This
-situation requires a `one-way, consistency-based, average rating` ICC.
+situation requires a `one-way, agreement-based, average rating` ICC.
 
 *Language sample coding*. We have two students in the lab
 transcribe interactions between a parent and child. We want to know whether the

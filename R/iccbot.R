@@ -50,6 +50,10 @@ run_icc <- function(
   type <- match.arg(type)
   unit <- match.arg(unit)
 
+  if (type == "consistency" && model == "oneway") {
+    stop("Consistency is not available for oneway models.")
+  }
+
   if (engine == "lme4") {
     ms_list <- decompose_variance_with_lme4(ratings)
     data_stats <- analyze_data(ratings)
@@ -196,9 +200,14 @@ decompose_variance_with_aov <- function(data) {
 compute_icc <- function(ns, nr, MSr, MSw, MSc, MSe, model, type, unit, r0, conf.level) {
   alpha <- 1 - conf.level
 
+  if (type == "consistency" && model == "oneway") {
+    stop("Consistency is not available for oneway models.")
+  }
+
   if (unit == "single") {
     if (model == "oneway") {
       icc.name <- "ICC(1)"
+      # type <- "agreement"
       coeff <- (MSr - MSw)/(MSr + (nr - 1) * MSw)
       Fvalue <- MSr/MSw * ((1 - r0)/(1 + (nr - 1) * r0))
       df1 <- ns - 1
@@ -252,6 +261,7 @@ compute_icc <- function(ns, nr, MSr, MSw, MSc, MSe, model, type, unit, r0, conf.
   }
   else if (unit == "average") {
     if (model == "oneway") {
+      # type <- "agreement"
       icc.name <- paste("ICC(", nr, ")", sep = "")
       coeff <- (MSr - MSw)/MSr
       Fvalue <- MSr/MSw * (1 - r0)
